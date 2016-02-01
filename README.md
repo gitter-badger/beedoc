@@ -1,5 +1,7 @@
 # What is this?
 
+[![Join the chat at https://gitter.im/drewwells/beedoc](https://badges.gitter.im/drewwells/beedoc.svg)](https://gitter.im/drewwells/beedoc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 An open source project for beego documentation.
 
 ## How to contribute?
