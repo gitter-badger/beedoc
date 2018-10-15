@@ -1,18 +1,24 @@
-# What is this?
 
-An open source project for beego documentation.
+This project is the source for http://beego.me/docs
+
 
 ## How to contribute?
 
-Fork, update and submit a pull request. No matter how big or small, your changes are welcome!
+[![Join the chat at https://gitter.im/beedoc-ptbr/Lobby](https://badges.gitter.im/beedoc-ptbr/Lobby.svg)](https://gitter.im/beedoc-ptbr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+Fork, update and submit a pull request. No matter how big or small, your contributions to this project are welcome!
 
 ## How does it work?
 
-Beego Web server checks for updates to this project and updates the main documentation automatically.
+A beego Web server checks for updates to this repository (https://github.com/beego/beedoc) and updates the main documentation automatically.
 
 ## Note
 
-Beego documentation is written using standard markdown syntax.  Please submit your changes using the same syntax.
+beego documentation is written using standard markdown syntax (https://guides.github.com/features/mastering-markdown/).  Please submit your changes using the same syntax.
+
+## Community
+
+Welcome to join us in Slack: [https://beego.slack.com](https://beego.slack.com), you can get invited [here](https://github.com/beego/beedoc/issues/232)
 
 ## License
 
