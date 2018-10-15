@@ -5,9 +5,9 @@ sort: 2
 
 # ORM Usage
 
-The example of beego/orm:
+An example of beego/orm is set out below.
 
-All the code samples in this section are based on this example if not stated otherwise.
+All the code samples in this section are based on this example unless otherwise stated.
 
 ##### models.go:
 
@@ -48,7 +48,7 @@ import (
 )
 
 func init() {
-	orm.RegisterDriver("mysql", orm.DR_MySQL)
+	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	orm.RegisterDataBase("default", "mysql", "root:root@/orm_test?charset=utf8")
 }
@@ -71,7 +71,7 @@ func main() {
 
 ## Set up database
 
-ORM supports three databases. here are the tested drivers, you need to import them:
+ORM supports three popular databases. Here are the tested drivers, you need to import them:
 
 ```go
 import (
@@ -86,6 +86,12 @@ import (
 Three default databases:
 
 ```go
+// For version 1.6
+orm.DRMySQL
+orm.DRSqlite
+orm.DRPostgres
+
+// < 1.6
 orm.DR_MySQL
 orm.DR_Sqlite
 orm.DR_Postgres
@@ -96,14 +102,14 @@ orm.DR_Postgres
 // param 2: database type
 // This mapping driverName and database type
 // mysql / sqlite3 / postgres registered by default already
-orm.RegisterDriver("mysql", orm.DR_MySQL)
+orm.RegisterDriver("mysql", orm.DRMySQL)
 ```
 
 #### RegisterDataBase
 
 ORM must register a database with alias `default`.
 
-ORM uses golang buildin connection pool.
+ORM uses golang built-in connection pool.
 
 ```go
 // param 1:        Database alias. ORM will use it to switch database.
@@ -117,6 +123,8 @@ maxIdle := 30
 maxConn := 30
 orm.RegisterDataBase("default", "mysql", "root:root@/orm_test?charset=utf8", maxIdle, maxConn)
 ```
+
+See [Test.md](https://beego.me/docs/mvc/model/test.md) for more information on database connection strings.
 
 #### SetMaxIdleConns
 
@@ -136,7 +144,7 @@ orm.SetMaxOpenConns("default", 30)
 
 #### Timezone Config
 
-ORM use time.Local by default
+ORM uses time.Local by default
 
 * used for ORM automatically created time
 * convert time queried from database into ORM local time
@@ -147,25 +155,25 @@ You can change it if needed:
 // Set to UTC time
 orm.DefaultTimeLoc = time.UTC
 ```
-ORM will get timezone of database while `RegisterDataBase`. When set or get time.Time it will convert accordingly to match system time and make sure the time is correct.
+ORM will get timezone of database while performing `RegisterDataBase`. When setting or getting time.Time it will convert accordingly to match system time and make sure the time is correct.
 
 **Note:**
 
-* Because of Sqlite3 set and get use UTC time by default.
-* When use `go-sql-driver` driver，please attention your DSN config.
-  From a version of `go-sql-driver` default use utc timezone not local. So if you use another timezone, please set it.
+* In Sqlite3, set and get use UTC time by default.
+* When using `go-sql-driver` driver，please pay attention to your DSN config.
+  From a version of `go-sql-driver` the default uses utc timezone not local. So if you use another timezone, please set it.
   eg: `root:root@/orm_test?charset=utf8&loc=Asia%2FShanghai`
   ref: [loc](https://github.com/go-sql-driver/mysql#loc) / [parseTime](https://github.com/go-sql-driver/mysql#parsetime)
 
 ## Registering Model
 
-This is compulsory if use orm.QuerySeter for advanced query.
+Registering a model is mandatory if you use orm.QuerySeter for advanced queries.
 
-Otherwise you don't need to do this if you use raw SQL query and map struct only. [Raw SQL Query](rawsql.md)
+Otherwise, you don't need to do this if you're using raw SQL queries and map struct only. [See Raw SQL Query](rawsql.md)
 
 #### RegisterModel
 
-Register the Model you defined. The best practice is to have a single models.go file and register in its init function.
+Register the Model you defined. The best practice is to have a single models.go file and register in it's init function.
 
 Mini models.go
 
@@ -184,13 +192,41 @@ func init(){
 }
 ```
 
-RegisterModel can register multiple model at the same time:
+RegisterModel can register multiple models at the same time:
 
 ```go
 orm.RegisterModel(new(User), new(Profile), new(Post))
 ```
 
-For detailed struct definination, see [Model define](models.md)
+For detailed struct definition, see [Model define](models.md)
+
+#### Generate Tables
+
+You may want Beego to automatically create your database tables.
+One way to do this is by using the method described in the [cli](cmd.md) documentation. 
+Alternatively, you could choose to autogenerate your tables by including the following
+in your main.go file in your main block. 
+
+```go
+// Database alias.
+name := "default"
+
+// Drop table and re-create.
+force := true
+
+// Print log.
+verbose := true
+
+// Error.
+err := orm.RunSyncdb(name, force, verbose)
+if err != nil {
+	fmt.Println(err)
+}
+```
+After the initial "bee run" command, change the values of force and verbose to false. 
+The default behavior for Beego is to add additional columns when the model is updated.
+You will need to manually handle dropping your columns if they are removed from your model. 
+
 
 #### RegisterModelWithPrefix
 
@@ -204,9 +240,9 @@ The created table name is prefix_user
 
 #### NewOrmWithDB
 
-May be some time need manage db pools by yourself. (eg: need two query in one connection)
+You may need to manage db pools by yourself. (eg: needing two queries in one connection)
 
-But you want use orm awesome features. Bingo!
+But you want to use awesome orm features. Voila!
 
 ```go
 var driverName, aliasName string
@@ -219,7 +255,7 @@ o := orm.NewOrmWithDB(driverName, aliasName, db)
 
 #### GetDB
 
-Get *sql.DB from registered databases. Use `default` as default if you not set.
+Get *sql.DB from the registered databases. This will use `default` as default if you do not set.
 
 ```go
 db, err := orm.GetDB()
@@ -235,7 +271,7 @@ if err != nil {
 
 #### ResetModelCache
 
-Reset registered models. Common use for write test case.
+Reset registered models. Commonly used to write test cases.
 
 ```go
 orm.ResetModelCache()
@@ -308,7 +344,7 @@ Use `default` database, no need to use `Using`
 
 Use raw SQL query:
 
-Raw function will return a [RawSeter](rawsql.md) to execute query with the SQL and params provided:
+Raw function will return a [RawSeter](rawsql.md) to execute a query with the SQL and params provided:
 
 ```go
 o := NewOrm()
@@ -335,20 +371,20 @@ o1 := orm.NewOrm()
 o1.Using("db1")
 dr := o1.Driver()
 fmt.Println(dr.Name() == "db1") // true
-fmt.Println(dr.Type() == orm.DR_MySQL) // true
+fmt.Println(dr.Type() == orm.DRMySQL) // true
 
 o2 := orm.NewOrm()
 o2.Using("db2")
 dr = o2.Driver()
 fmt.Println(dr.Name() == "db2") // true
-fmt.Println(dr.Type() == orm.DR_Sqlite) // true
+fmt.Println(dr.Type() == orm.DRSqlite) // true
 ```
 
-## Print out SQL query in debugging mode
+## Print out SQL queries in debugging mode
 
-Setting `orm.Debug` to true will print out SQL queries
+Setting `orm.Debug` to true will print out SQL queries.
 
-It may cause performance issues. It's not recommend to be used in production env.
+It may cause performance issues. It is not recommended to be used in a production env.
 
 ```go
 func main() {

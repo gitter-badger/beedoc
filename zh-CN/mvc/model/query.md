@@ -30,7 +30,7 @@ QuerySeter 中用于描述字段和 sql 操作符，使用简单的 expr 查询�
 ```go
 qs.Filter("id", 1) // WHERE id = 1
 qs.Filter("profile__age", 18) // WHERE profile.age = 18
-qs.Filter("Profile__Age", 18) // 使用字段名和Field名都是允许的
+qs.Filter("Profile__Age", 18) // 使用字段名和 Field 名都是允许的
 qs.Filter("profile__age", 18) // WHERE profile.age = 18
 qs.Filter("profile__age__gt", 18) // WHERE profile.age > 18
 qs.Filter("profile__age__gte", 18) // WHERE profile.age >= 18
@@ -176,7 +176,9 @@ QuerySeter 是高级查询使用的接口，我们来熟悉下他的接口方法
 	* [SetCond(*Condition) QuerySeter](#setcond)
 	* [Limit(int, ...int64) QuerySeter](#limit)
 	* [Offset(int64) QuerySeter](#offset)
+	* [GroupBy(...string) QuerySeter](#groupby)
 	* [OrderBy(...string) QuerySeter](#orderby)
+	* [Distinct() QuerySeter](#distinct)
 	* [RelatedSel(...interface{}) QuerySeter](#relatedsel)
 	* [Count() (int64, error)](#count)
 	* [Exist() bool](#exist)
@@ -223,7 +225,7 @@ qs.Exclude("profile__isnull", true).Filter("name", "slene")
 自定义条件表达式
 
 ```go
-cond := NewCondition()
+cond := orm.NewCondition()
 cond1 := cond.And("profile__isnull", false).AndNot("status__in", 1).Or("profile__age__gt", 2000)
 
 qs := orm.QueryTable("user")
@@ -249,7 +251,7 @@ qs.Limit(10)
 // LIMIT 10
 
 qs.Limit(10, 20)
-// LIMIT 10 OFFSET 20 注意跟SQL反过来的
+// LIMIT 10 OFFSET 20 注意跟 SQL 反过来的
 
 qs.Limit(-1)
 // no limit
@@ -260,12 +262,19 @@ qs.Limit(-1, 100)
 ```
 
 ### Offset
-	
+
 设置 偏移行数
 
 ```go
 qs.Offset(20)
 // LIMIT 1000 OFFSET 20
+```
+
+### GroupBy
+
+```go
+qs.GroupBy("id", "age")
+// GROUP BY id,age
 ```
 
 ### OrderBy
@@ -282,6 +291,15 @@ qs.OrderBy("-profile__age", "profile")
 // ORDER BY profile.age DESC, profile_id ASC
 ```
 
+### Distinct
+
+对应 sql 的 `distinct` 语句, 返回不重复的值.
+
+```go
+qs.Distinct()
+// SELECT DISTINCT
+```
+
 ### RelatedSel
 
 关系查询，参数使用 **expr**
@@ -295,7 +313,7 @@ qs.RelatedSel()
 // INNER JOIN user ... LEFT OUTER JOIN profile ...
 
 qs.RelatedSel("user")
-// INNER JOIN user ... 
+// INNER JOIN user ...
 // 设置 expr 只对设置的字段进行关系查询
 
 // 对设置 null 属性的 Field 将使用 LEFT OUTER JOIN
@@ -334,7 +352,7 @@ fmt.Printf("Affected Num: %s, %s", num, err)
 ```go
 // 假设 user struct 里有一个 nums int 字段
 num, err := o.QueryTable("user").Update(orm.Params{
-	"nums": orm.ColValue(orm.Col_Add, 100),
+	"nums": orm.ColValue(orm.ColAdd, 100),
 })
 // SET nums = nums + 100
 ```
@@ -342,10 +360,10 @@ num, err := o.QueryTable("user").Update(orm.Params{
 orm.ColValue 支持以下操作
 
 ```go
-Col_Add      // 加
-Col_Minus    // 减
-Col_Multiply // 乘
-Col_Except   // 除
+ColAdd      // 加
+ColMinus    // 减
+ColMultiply // 乘
+ColExcept   // 除
 ```
 
 ### Delete
@@ -507,14 +525,14 @@ if err == nil {
 
 ### ValuesFlat
 
-只返回特定的 Field 值，讲结果集展开到单个 slice 里
+只返回特定的 Field 值，将结果集展开到单个 slice 里
 
 ```go
 var list orm.ParamsList
 num, err := o.QueryTable("user").ValuesFlat(&list, "name")
 if err == nil {
 	fmt.Printf("Result Nums: %d\n", num)
-	fmt.Printf("All User Names: %s", strings.Join(list, ", ")
+	fmt.Printf("All User Names: %s", strings.Join(list, ", "))
 }
 ```
 
@@ -543,6 +561,8 @@ o.QueryTable("user").Filter("Id", 1).RelatedSel().One(user)
 fmt.Println(user.Profile)
 // 因为在 Profile 里定义了反向关系的 User，所以 Profile 里的 User 也是自动赋值过的，可以直接取用。
 fmt.Println(user.Profile.User)
+
+// [SELECT T0.`id`, T0.`name`, T0.`profile_id`, T1.`id`, T1.`age` FROM `user` T0 INNER JOIN `profile` T1 ON T1.`id` = T0.`profile_id` WHERE T0.`id` = ? LIMIT 1000] - `1`
 ```
 
 通过 User 反向查询 Profile：
@@ -575,11 +595,12 @@ if err == nil {
 		fmt.Printf("Id: %d, UserName: %d, Title: %s\n", post.Id, post.User.UserName, post.Title)
 	}
 }
+// [SELECT T0.`id`, T0.`title`, T0.`user_id`, T1.`id`, T1.`name`, T1.`profile_id`, T2.`id`, T2.`age` FROM `post` T0 INNER JOIN `user` T1 ON T1.`id` = T0.`user_id` INNER JOIN `profile` T2 ON T2.`id` = T1.`profile_id` WHERE T0.`user_id` = ? LIMIT 1000] - `1`
 ```
 
 根据 Post.Title 查询对应的 User：
 
-RegisterModel 时，ORM也会自动建立 User 中 Post 的反向关系，所以可以直接进行查询
+RegisterModel 时，ORM 也会自动建立 User 中 Post 的反向关系，所以可以直接进行查询
 
 ```go
 var user User
@@ -591,7 +612,7 @@ if err == nil {
 
 #### Post 和 Tag 是 ManyToMany 关系
 
-设置 rel(m2m) 以后，ORM会自动创建中间表
+设置 rel(m2m) 以后，ORM 会自动创建中间表
 
 ```go
 type Post struct {
@@ -610,7 +631,7 @@ type Tag struct {
 }
 ```
 
-通过 tag name 查询哪些 post 使用了这个 tag
+一条 Post 纪录可能对应不同的 Tag 纪录,一条 Tag 纪录可能对应不同的 Post 纪录，所以 Post 和 Tag 属于多对多关系,通过 tag name 查询哪些 post 使用了这个 tag
 
 ```go
 var posts []*Post
@@ -678,7 +699,7 @@ o := orm.NewOrm()
 post := Post{Id: 1}
 m2m := o.QueryM2M(&post, "Tags")
 // 第一个参数的对象，主键必须有值
-// 第二个参数为对象需要操作的M2M字段
+// 第二个参数为对象需要操作的 M2M 字段
 // QueryM2Mer 的 api 将作用于 Id 为 1 的 Post
 ```
 

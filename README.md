@@ -1,11 +1,9 @@
 
 This project is the source for http://beego.me/docs
+[![Join the chat at https://gitter.im/beedoc-ptbr/Lobby](https://badges.gitter.im/beedoc-ptbr/Lobby.svg)](https://gitter.im/beedoc-ptbr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 ## How to contribute?
-
-[![Join the chat at https://gitter.im/beedoc-ptbr/Lobby](https://badges.gitter.im/beedoc-ptbr/Lobby.svg)](https://gitter.im/beedoc-ptbr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Fork, update and submit a pull request. No matter how big or small, your contributions to this project are welcome!
 
 ## How does it work?

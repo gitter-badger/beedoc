@@ -12,15 +12,15 @@ sort: 6
 func (c *MainController) Get() {
 	flash:=beego.ReadFromRequest(&c.Controller)
 	if n,ok:=flash.Data["notice"];ok{
-		//显示设置成功
-		c.TplNames = "set_success.html"
+		// 显示设置成功
+		c.TplName = "set_success.html"
 	}else if n,ok=flash.Data["error"];ok{
-		//显示错误
-		c.TplNames = "set_error.html"
+		// 显示错误
+		c.TplName = "set_error.html"
 	}else{
 		// 不然默认显示设置页面
 		c.Data["list"]=GetInfo()
-		c.TplNames = "setting_list.html"
+		c.TplName = "setting_list.html"
 	}
 }
 
@@ -40,7 +40,7 @@ func (c *MainController) Post() {
 		flash.Store(&c.Controller)
 		c.Redirect("/setting",302)
 		return
-	}	
+	}
 	saveSetting(setting)
 	flash.Notice("Settings saved!")
 	flash.Store(&c.Controller)
@@ -60,7 +60,7 @@ func (c *MainController) Post() {
 	{{.flash.error}}
 	{{.flash.warning}}
 	{{.flash.notice}}
-	
+
 flash 对象有三个级别的设置：
 
 * Notice 提示信息

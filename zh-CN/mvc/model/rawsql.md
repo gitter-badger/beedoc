@@ -17,7 +17,7 @@ p.Raw("SELECT name FROM user WHERE id IN (?, ?, ?)", ids)
 创建一个 **RawSeter**
 
 ```go
-o := NewOrm()
+o := orm.NewOrm()
 var r RawSeter
 r = o.Raw("UPDATE user SET name = ? WHERE name = ?", "testing", "slene")
 ```
@@ -30,14 +30,14 @@ r = o.Raw("UPDATE user SET name = ? WHERE name = ?", "testing", "slene")
 	* [Values(*[]Params, ...string) (int64, error)](#values)
 	* [ValuesList(*[]ParamsList, ...string) (int64, error)](#valueslist)
 	* [ValuesFlat(*ParamsList, string) (int64, error)](#valuesflat)
-	* [RowsToMap(*Params, string, string) (int64, error)](#rawstomap)
-	* [RowsToStruct(interface{}, string, string) (int64, error)](#rawstostruct)
+	* [RowsToMap(*Params, string, string) (int64, error)](#rowstomap)
+	* [RowsToStruct(interface{}, string, string) (int64, error)](#rowstostruct)
 	* [Prepare() (RawPreparer, error)](#prepare)
 * }
 
 #### Exec
 
-执行sql语句，返回 [sql.Result](http://gowalker.org/database/sql#Result) 对象
+执行 sql 语句，返回 [sql.Result](http://gowalker.org/database/sql#Result) 对象
 
 ```go
 res, err := o.Raw("UPDATE user SET name = ?", "your").Exec()
@@ -101,7 +101,7 @@ res, err := r.SetArgs("arg1", "arg2").Exec()
 
 Raw SQL 查询获得的结果集 Value 为 `string` 类型，NULL 字段的值为空 ``
 
-> from beego 1.1.0 
+> from beego 1.1.0
 > Values, ValuesList, ValuesFlat 的参数，可以指定返回哪些 Columns 的数据
 > 通常情况下，是无需指定的，因为 sql 语句中你可以自行设置 SELECT 的字段
 
@@ -111,7 +111,7 @@ Raw SQL 查询获得的结果集 Value 为 `string` 类型，NULL 字段的值�
 
 ```go
 var maps []orm.Params
-num, err = o.Raw("SELECT user_name FROM user WHERE status = ?", 1).Values(&maps)
+num, err := o.Raw("SELECT user_name FROM user WHERE status = ?", 1).Values(&maps)
 if err == nil && num > 0 {
 	fmt.Println(maps[0]["user_name"]) // slene
 }
@@ -123,7 +123,7 @@ if err == nil && num > 0 {
 
 ```go
 var lists []orm.ParamsList
-num, err = o.Raw("SELECT user_name FROM user WHERE status = ?", 1).ValuesList(&lists)
+num, err := o.Raw("SELECT user_name FROM user WHERE status = ?", 1).ValuesList(&lists)
 if err == nil && num > 0 {
 	fmt.Println(lists[0][0]) // slene
 }
@@ -135,7 +135,7 @@ if err == nil && num > 0 {
 
 ```go
 var list orm.ParamsList
-num, err = o.Raw("SELECT id FROM user WHERE id < ?", 10).ValuesFlat(&list)
+num, err := o.Raw("SELECT id FROM user WHERE id < ?", 10).ValuesFlat(&list)
 if err == nil && num > 0 {
 	fmt.Println(list) // []{"1","2","3",...}
 }
@@ -179,7 +179,7 @@ type Options struct {
 }
 
 res := new(Options)
-nums, err := o.Raw("SELECT name, value FROM options_table").RowsToMap(res, "name", "value")
+nums, err := o.Raw("SELECT name, value FROM options_table").RowsToStruct(res, "name", "value")
 fmt.Println(res.Total) // 100
 fmt.Println(res.Found) // 200
 ```

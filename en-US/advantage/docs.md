@@ -1,15 +1,19 @@
 ---
-name: Automated API Document
+name: Automated API Documentation
 sort: 2
 ---
 
-# Automated API Document
+# Automated API Documentation
 
-Automated document is a very cool feature that I wish to have. Now it became real in Beego. As I said Beego will not only boost the development of API but also make the API easy to use for the user. Ok, let's try it out now. First create a new API application by `bee api beeapi`
+Automated documentation is a very cool feature that I found to be desirable. Now it became a reality in Beego. As I said Beego will not only boost the development of your API but also make the API easy to use for the user. 
+
+Beego implemented the [swagger specification](http://swagger.io/) for API documentation. It's very easy to create powerful interactive API documentation.
+
+Ok, let's try it out now. First let's create a new API application by `bee api beeapi`
 
 # API global settings
 
-Add the comments at the top of `routers/router.go`:
+Add the following comments at the top of `routers/router.go`:
 
 ```
 // @APIVersion 1.0.0
@@ -28,9 +32,15 @@ The comments above set the global information. The available settings:
 - @TermsOfServiceUrl
 - @License
 - @LicenseUrl
+- @Name
+- @URL
+- @LicenseUrl
+- @License
+- @Schemes
+- @Host
 
 ## Router Parsing
-Right now automated API document only supports namespace+Include and only supports two levels parsing. The first level is API version and the second level is the modules.
+Right now automated API documentation only supports `NSNamespace` and `NSInclude` and it only supports two levels of parsing. The first level is the API version and the second level is the modules.
 
 ```
 func init() {
@@ -49,7 +59,7 @@ func init() {
 			),
 			beego.NSNamespace("/newsletter",
 				beego.NSInclude(
-					&controllers.NewsLettterController{},
+					&controllers.NewsLetterController{},
 				),
 			),
 			beego.NSNamespace("/cms",
@@ -68,7 +78,7 @@ func init() {
 ```
 
 ## Application Comment
-The most important part of comment. For example:
+This is the most important part of comment. For example:
 
 ```
 package controllers
@@ -86,11 +96,14 @@ func (c *CMSController) URLMapping() {
 }
 
 // @Title getStaticBlock
+// @Summary getStaticBlock
+// @Deprecated Deprecated
 // @Description get all the staticblock by key
-// @Param	key		path 	string	true		"The email for login"
-// @Success 200 {object} models.ZDTCustomer.Customer
-// @Failure 400 Invalid email supplied
-// @Failure 404 User not found
+// @Param	key	path	string	true	"The static block key."	default_value
+// @Success 200 {object} ZDT.ZDTMisc.CmsResponse
+// @Failure 400 Bad request
+// @Failure 404 Not found
+// @Accept json
 // @router /staticblock/:key [get]
 func (c *CMSController) StaticBlock() {
 
@@ -120,57 +133,62 @@ func (c *CMSController) Product() {
 }
 ```
 
-We defined the comment above for `CMSController` which will show for this module. Then we need to define the comment for every functions. Below is the supported comments:
+In the code above, we defined the comment on top of `CMSController` is the information for this module. Then we defined the comment for every controller's methods. 
 
+Below is a list of supported comments for generating swagger APIs:
+
+- @Accept
+	Aceept type json/xml/html/plain
+- @Deprecated
+	Deprecated flag.
 - @Title
 
-	The title for this API. it's a string, all the content after the first space will be parsed as the title.
-	
+	The title for this API. It's a string, and all the content after the first space will be parsed as the title.
+
 - @Description
 
-	
-	The description for this API. it's a string, all the content after the first space will be parsed as the description.
-	
+	The description for this API. It's a string, and all the content after the first space will be parsed as the description.
+
 - @Param
 
 	`@Param` defines the parameters sent to the server. There are five columns for each `@Param`:
-	1. parameter name;
-	2. parameter sending type; It can be `form`, `query`, `path`, `body` or `header`. `form` means the parameter send by POST. `query` means the parameter in url send by GET. `path` means the parameter in the url path, such as key in the former example. `body` means the raw dada send from request body. `header` means the parameter in request header.
+	1. parameter key;
+	2. parameter sending type; It can be `formData`, `query`, `path`, `body` or `header`. `formData` means the parameter sends by POST ( set Content-Type to application/x-www-form-urlencoded ) . `query` means the parameter sends by GET in url. 
+	`path` means the parameter in the url path, such as key in the former example. `body` means the raw data send from request body. `header` means the parameter is in request header.
 	3. parameter data type
 	4. required
 	5. comment
-	
+	6. default value
+
 - @Success
 
 	The success message returned to client. Three parameters.
 	1. status code.
 	2. return type; Must wrap with {}.
-	3. returned object or string. For {object}, use path and the object name of your project here and `bee` tool will look up the object while generate the docs. For example `models.ZDTProduct.ProductList` represents `ProductList` object under `/models/ZDTProduct`
-	
+	3. returned object or string. For {object}, use path and the object name of your project here and `bee` tool will look up the object while generating the docs. For example `models.ZDTProduct.ProductList` represents `ProductList` object under `/models/ZDTProduct`
+
 	>>> Use space to separate these three parameters
-	
+
 - @Failure
 
 	The failure message returned to client. Two parameters separated by space.
-	1. status code.
-	2. Error message
-	
+	1. Status code.
+	2. Error message.
+
 - @router
 
 	Router information. Two parameters separated by space.
 	1. The request's router address.
-	2. Supported request methods. Wrap in `[]`. Use `,` to seaparte multiple methods.
+	2. Supported request methods. Wrap in `[]`. Use `,` to separate multiple methods.
 
-## Generate document automatically
+## Generate documentation automatically
 
-To make it work following the steps:
-1. Enable docs by setting `EnableDocs = true` in `conf/app.conf`
-2. Generate document files by `bee generate docs`
-3. Import `_ "beeapi/docs"` in `main.go`
-4. Use `bee run watchall true` to run your API application and rebuild document automatically. 
-5. Now run `bee rundocs -isDownload=true` in another terminal. It will download `swagger` viewer and run on port 8089. You can change port by `bee rundocs -docport=8888`
+Make it work by following the steps:
+1. Enable docs by setting `EnableDocs = true` in `conf/app.conf`.
+2. Use `bee run -downdoc=true -gendoc=true` to run your API application and rebuild documentation automatically.
+3. Visit `/swagger` in your project.  (see image #1 below)
 
-Your API document is available now. Open your browser and check it.
+Your API documentation is available now. Open your browser and check it out.
 
 ![](../images/docs.png)
 
@@ -178,18 +196,19 @@ Your API document is available now. Open your browser and check it.
 
 ## Problems You May Have
 1. CORS
-	Two solutioins
-	1. Integrate `swagger` into the application. Download [swagger](https://github.com/beego/swagger/releases) and put it into project folder. (`bee rundocs -isDownload=true` will also download it and put it into project folder) 
+	Two solutions:
+	1. Integrate `swagger` into the application. Download [swagger](https://github.com/beego/swagger/releases) and put it into project folder. (`bee run -downdoc=true` will also download it and put it into project folder)
 	And before 	`beego.Run()` in `func main()` of `main.go`
+		```go
+		if beego.BConfig.RunMode == "dev" {
+			beego.BConfig.WebConfig.DirectoryIndex = true
+			beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+		}
+		```
+		And then visit `/swagger` in your project.
 
-		if beego.RunMode == "dev" {
-			beego.DirectoryIndex = true
-			beego.StaticDir["/swagger"] = "swagger"
-		}		
-
-	And then visit `swagger` document from API project's URL and port.
 	2. Make API support CORS
-	
-			ctx.Output.Header("Access-Control-Allow-Origin", "*")
-			
-2. Other problems. This is a feature used in my own project. If you have some other problems plese fire issues to us.
+		```go
+		ctx.Output.Header("Access-Control-Allow-Origin", "*")
+		```
+2. Other problems. This is a feature used in my own project. If you have some other problems please fire issues to us.

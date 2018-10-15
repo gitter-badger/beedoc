@@ -5,7 +5,7 @@ sort: 4
 
 # Advanced Queries
 
-ORM uses **QuerySeter** to organize query, every method that returns  **QuerySeter** will give you a new **QuerySeter** object.
+ORM uses **QuerySeter** to organize queries.  Every method that returns  **QuerySeter** will give you a new **QuerySeter** object.
 
 
 Basic Usage:
@@ -25,9 +25,9 @@ qs = o.QueryTable(user) // return a QuerySeter
 
 expr describes fields and SQL operators in `QuerySeter`.
 
-Field combination orders are decided by the relationship of tables. For example, `User` has a foreign key to `Profile`, so if you want to use `Profile.Age` as the condition, you have to use the expression `Profile__Age`. Note that the saperator is double under scores `__`. `Expr` can also append operators at the end to execute related SQL. For example, `Profile__Age__gt` represents condition query `Profile.Age > 18`.
+Field combination orders are decided by the relationship of tables. For example, `User` has a foreign key to `Profile`, so if you want to use `Profile.Age` as the condition, you have to use the expression `Profile__Age`. Note that the separator is double under scores `__`. `Expr` can also append operators at the end to execute related SQL. For example, `Profile__Age__gt` represents condition query `Profile.Age > 18`.
 
-Comments below describe SQL statements that are similar to the expr, not the exactly generated results.
+Comments below describe SQL statements that are similar to the expr, but may not be the exact generated results.
 
 ```go
 qs.Filter("id", 1) // WHERE id = 1
@@ -163,7 +163,7 @@ qs.Filter("profile__isnull", false)
 
 ## Advanced Query API
 
-QuerySeter is the API of advanced query. Here are its methods:
+QuerySeter is the API of advanced queries. Here are its methods:
 
 * type QuerySeter interface {
 	* [Filter(string, ...interface{}) QuerySeter](#filter)
@@ -171,7 +171,9 @@ QuerySeter is the API of advanced query. Here are its methods:
 	* [SetCond(*Condition) QuerySeter](#setcond)
 	* [Limit(int, ...int64) QuerySeter](#limit)
 	* [Offset(int64) QuerySeter](#offset)
+	* [GroupBy(...string) QuerySeter](#groupby)
 	* [OrderBy(...string) QuerySeter](#orderby)
+	* [Distinct() QuerySeter](#distinct)
 	* [RelatedSel(...interface{}) QuerySeter](#relatedsel)
 	* [Count() (int64, error)](#count)
 	* [Exist() bool](#exist)
@@ -185,9 +187,9 @@ QuerySeter is the API of advanced query. Here are its methods:
 	* [ValuesFlat(*ParamsList, string) (int64, error)](#valuesflat)
 * }
 
-* Every API call that returns **QuerySeter** will give you a new **QuerySeter** object. It won't affect the previous object
+* Every API call that returns **QuerySeter** will give you a new **QuerySeter** object. It won't affect the previous object.
 
-* Advanced query uses `Filter` and `Exclude` to do conditional queries.  There are two filter rules: contain and exclude
+* Advanced queries use `Filter` and `Exclude` to do conditional queries.  There are two filter rules - contain and exclude
 
 ### Filter
 
@@ -261,6 +263,13 @@ qs.Offset(20)
 // LIMIT 1000 OFFSET 20
 ```
 
+### GroupBy
+
+```go
+qs.GroupBy("id", "age")
+// GROUP BY id,age
+```
+
 ### OrderBy
 
 Param uses **expr**
@@ -273,6 +282,15 @@ qs.OrderBy("id", "-profile__age")
 
 qs.OrderBy("-profile__age", "profile")
 // ORDER BY profile.age DESC, profile_id ASC
+```
+
+### Distinct
+	
+Same as `distinct` statement in sql, return only distinct (different) values
+
+```go
+qs.Distinct()
+// SELECT DISTINCT
 ```
 
 ### RelatedSel
@@ -370,7 +388,7 @@ for _, user := range users {
 // EXECUTE INSERT INTO user (`name`, ...) VALUES ("slene", ...)
 // EXECUTE ...
 // ...
-i.Close() // Don't forget close the statement
+i.Close() // Don't forget to close the statement
 ```
 
 ### All
@@ -507,13 +525,13 @@ var list orm.ParamsList
 num, err := o.QueryTable("user").ValuesFlat(&list, "name")
 if err == nil {
 	fmt.Printf("Result Nums: %d\n", num)
-	fmt.Printf("All User Names: %s", strings.Join(list, ", ")
+	fmt.Printf("All User Names: %s", strings.Join(list, ", "))
 }
 ```
 
 ## Relational Query
 
-Let's see how to do Relational Query by looking at [Model Definition](orm.md)
+Let's see how to do a Relational Query by looking at [Model Definition](orm.md)
 
 #### User and Profile is OnToOne relation
 
@@ -609,7 +627,7 @@ var posts []*Post
 num, err := dORM.QueryTable("post").Filter("Tags__Tag__Name", "golang").All(&posts)
 ```
 
-Query how many tags do the post have with post title:
+Query how many tags does the post have with post title:
 
 ```go
 var tags []*Tag

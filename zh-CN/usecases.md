@@ -30,7 +30,10 @@
         	<td></td>
         	<td>Weibo 3 后端 API 服务。</td>
         </tr>
-
+        <tr>
+        	<td></td>
+        	<td>我们行　视频云服务接口,每天处理超过500万的视频抽帧,缩放,水印处理。</td>
+        </tr>
         <tr>
         	<td>博客网站</td>
         	<td>速动中国 - 多用户博客分享网站</td>
@@ -42,28 +45,13 @@
         	<td>非常时刻 - 社交分享社区</td>
         	<td><a target="_blank" href="http://www.veryhour.com">http://veryhour.com</a></td>
         </tr>
-        
+
            <tr>
         	<td>股票应用</td>
         	<td>数据查询</td>
         	<td><a target="_blank" href="http://sj.n8n8.cn/">http://sj.n8n8.cn/</a></td>
         </tr>
 
-        <tr>
-        	<td>企业网站</td>
-        	<td>艾美</td>
-        	<td><a target="_blank" href="http://www.ibeautys.com/">http://ibeautys.com/</a></td>
-        </tr>
 
-        <tr>
-        	<td></td>
-        	<td>茵特拉</td>
-        	<td><a target="_blank" href="http://interla.net">http://interla.net</a></td>
-        </tr>
-                <tr>
-        	<td></td>
-        	<td>欧润吉广告</td>
-        	<td><a target="_blank" href="http://www.orangesh.com">http://www.orangesh.com</a></td>
-        </tr>
     </tbody>
 </table>

@@ -22,17 +22,31 @@ type User struct {
 	Id          int
 	Name        string
 	Profile     *Profile   `orm:"rel(one)"` // OneToOne relation
+	Post    	[]*Post `orm:"reverse(many)"` // 设置一对多的反向关系
 }
 
 type Profile struct {
 	Id          int
 	Age         int16
-	User        *User   `orm:"reverse(one)"` // 设置反向关系(可选)
+	User        *User   `orm:"reverse(one)"` // 设置一对一反向关系(可选)
+}
+
+type Post struct {
+    Id    int
+    Title string
+    User  *User  `orm:"rel(fk)"`	//设置一对多关系
+    Tags  []*Tag `orm:"rel(m2m)"`
+}
+
+type Tag struct {
+    Id    int
+    Name  string
+    Posts []*Post `orm:"reverse(many)"`
 }
 
 func init() {
 	// 需要在init中注册定义的model
-	orm.RegisterModel(new(User), new(Profile))
+	orm.RegisterModel(new(User), new(Post), new(Profile), new(Tag))
 }
 ```
 
@@ -48,7 +62,7 @@ import (
 )
 
 func init() {
-	orm.RegisterDriver("mysql", orm.DR_MySQL)
+	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	orm.RegisterDataBase("default", "mysql", "root:root@/orm_test?charset=utf8")
 }
@@ -88,6 +102,12 @@ import (
 三种默认数据库类型
 
 ```go
+// For version 1.6
+orm.DRMySQL
+orm.DRSqlite
+orm.DRPostgres
+
+// < 1.6
 orm.DR_MySQL
 orm.DR_Sqlite
 orm.DR_Postgres
@@ -98,7 +118,7 @@ orm.DR_Postgres
 // 参数2   数据库类型
 // 这个用来设置 driverName 对应的数据库类型
 // mysql / sqlite3 / postgres 这三种是默认已经注册过的，所以可以无需设置
-orm.RegisterDriver("mymysql", orm.DR_MySQL)
+orm.RegisterDriver("mysql", orm.DRMySQL)
 ```
 
 #### RegisterDataBase
@@ -108,7 +128,7 @@ ORM 必须注册一个别名为 `default` 的数据库，作为默认使用。
 ORM 使用 golang 自己的连接池
 
 ```go
-// 参数1        数据库的别名，用来在ORM中切换数据库使用
+// 参数1        数据库的别名，用来在 ORM 中切换数据库使用
 // 参数2        driverName
 // 参数3        对应的链接字符串
 orm.RegisterDataBase("default", "mysql", "root:root@/orm_test?charset=utf8")
@@ -130,7 +150,7 @@ orm.SetMaxIdleConns("default", 30)
 
 #### SetMaxOpenConns
 
-根据数据库的别名，设置数据库的最大数据库连接  (go >= 1.2)
+根据数据库的别名，设置数据库的最大数据库连接 (go >= 1.2)
 
 ```go
 orm.SetMaxOpenConns("default", 30)
@@ -150,13 +170,13 @@ ORM 默认使用 time.Local 本地时区
 orm.DefaultTimeLoc = time.UTC
 ```
 
-ORM 在进行 RegisterDataBase 的同时，会获取数据库使用的时区，然后在 time.Time 类型存取的时做相应转换，以匹配时间系统，从而保证时间不会出错。
+ORM 在进行 RegisterDataBase 的同时，会获取数据库使用的时区，然后在 time.Time 类型存取时做相应转换，以匹配时间系统，从而保证时间不会出错。
 
 **注意:**
 
 * 鉴于 Sqlite3 的设计，存取默认都为 UTC 时间
 * 使用 go-sql-driver 驱动时，请注意参数设置
-  从某一版本开始，驱动默认使用UTC时间，而非本地时间，所以请指定时区参数或者全部以UTC时间存取
+  从某一版本开始，驱动默认使用 UTC 时间，而非本地时间，所以请指定时区参数或者全部以 UTC 时间存取
   例如：`root:root@/orm_test?charset=utf8&loc=Asia%2FShanghai`
   参见 [loc](https://github.com/go-sql-driver/mysql#loc) / [parseTime](https://github.com/go-sql-driver/mysql#parsetime)
 
@@ -215,7 +235,7 @@ orm.RegisterModelWithPrefix("prefix_", new(User))
 ```go
 var driverName, aliasName string
 // driverName 是驱动的名称
-// aliasName 是当前db的自定义别名
+// aliasName 是当前 db 的自定义别名
 var db *sql.DB
 ...
 o := orm.NewOrmWithDB(driverName, aliasName, db)
@@ -239,7 +259,7 @@ if err != nil {
 
 #### ResetModelCache
 
-重置已经注册的模型struct，一般用于编写测试用例
+重置已经注册的模型 struct，一般用于编写测试用例
 
 ```go
 orm.ResetModelCache()
@@ -341,20 +361,20 @@ o1 := orm.NewOrm()
 o1.Using("db1")
 dr := o1.Driver()
 fmt.Println(dr.Name() == "db1") // true
-fmt.Println(dr.Type() == orm.DR_MySQL) // true
+fmt.Println(dr.Type() == orm.DRMySQL) // true
 
 o2 := orm.NewOrm()
 o2.Using("db2")
 dr = o2.Driver()
 fmt.Println(dr.Name() == "db2") // true
-fmt.Println(dr.Type() == orm.DR_Sqlite) // true
+fmt.Println(dr.Type() == orm.DRSqlite) // true
 ```
 
 ## 调试模式打印查询语句
 
 简单的设置 Debug 为 true 打印查询的语句
 
-可能存在性能问题，不建议使用在产品模式
+可能存在性能问题，不建议使用在生产模式
 
 ```go
 func main() {

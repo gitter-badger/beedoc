@@ -4,9 +4,9 @@ name: Install / Upgrade
 sort: 1
 ---
 
-# Installing beego
+# Installing Beego
 
-You can use the classic Go way to install beego:
+You can use the classic Go way to install Beego:
 
 	go get github.com/astaxie/beego
 
@@ -17,27 +17,19 @@ Frequently asked questions:
 
 		git config --global http.sslVerify false
 
-- How can I install beego offline? There is no good solution now. We will creat packages for downloading and installing for every release.
+- How can I install Beego offline? There is no good solution for now. We will create packages for downloading and installing for future releases.
 
-# Upgrading beego
+# Upgrading Beego
 
-You can upgrade beego through Go command or download and upgrade from source code.
+You can upgrade Beego through Go command or download and upgrade from source code.
 
-- Through Go command: we recommand you using this way to upgrade beego:
+- Through Go command (Recommended):
 
 		go get -u github.com/astaxie/beego
-		
-- Through source code: visit `https://github.com/astaxie/beego` and download the source code. Copy and overwrite to path `$GOPATH/github.com/astaxie/beego`. Then run `go install` to upgrade beego:
 
-		go install 	github.com/astaxie/beego	
+- Through source code: visit `https://github.com/astaxie/beego` and download the source code. Copy and overwrite to path `$GOPATH/src/github.com/astaxie/beego`. Then run `go install` to upgrade Beego:
 
-# The git branches of beego
+		go install 	github.com/astaxie/beego
 
-The master branch is relatively stable one where dev branch is for developers. Here is a sample figure to show you how our branches work:
+**Upgrading Prior to 1.0:** The API of Beego is stable after 1.0 and compatible with every upgrade. If you are still using a version lower than 1.0 you may need to configure your parameters based on the latest API.
 
-![](../images/git-branch-1.png)
-
-
-# How can I be a contributer of beego
-
-Beego's source code is hosted on GitHub. You can fork, modify and then send a Pull Request to us. We will review your code and give you feedback of your changes as soon as possible.  

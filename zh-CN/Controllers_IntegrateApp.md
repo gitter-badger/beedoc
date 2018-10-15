@@ -23,7 +23,7 @@ var users *sockjs.SessionPool = sockjs.NewSessionPool()
 func chatHandler(s sockjs.Session) {
 	users.Add(s)
 	defer users.Remove(s)
-	
+
 	for {
 		m := s.Receive()
 		if m == nil {
@@ -41,7 +41,7 @@ type MainController struct {
 }
 
 func (m *MainController) Get() {
-	m.TplNames = "index.html"
+	m.TplName = "index.html"
 }
 
 func main() {

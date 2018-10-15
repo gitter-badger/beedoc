@@ -28,7 +28,7 @@ To query the object by conditions see [Query in advance](query.md#all)
 o := orm.NewOrm()
 user := User{Id: 1}
 
-err = o.Read(&user)
+err := o.Read(&user)
 
 if err == orm.ErrNoRows {
 	fmt.Println("No result found.")
@@ -43,7 +43,7 @@ Read uses primary key by default. But it can use other fields as well:
 
 ```go
 user := User{Name: "slene"}
-err = o.Read(&user, "Name")
+err := o.Read(&user, "Name")
 ...
 ```
 Other fields of the object are set to the default value according to the field type.
@@ -54,7 +54,7 @@ For detailed single object query, see [One](query.md#one)
 
 Try to read a row from the database, or insert one if it doesn't exist.
 
-At least one condition field must be supplied, multipe condition fields are also supported.
+At least one condition field must be supplied, multiple condition fields are also supported.
 
 ```go
 o := orm.NewOrm()
@@ -85,7 +85,7 @@ if err == nil {
 }
 ```
 
-After creation it will assign values for auto fields.
+After creation, it will assign values for auto fields.
 
 ## InsertMulti
 
@@ -128,7 +128,7 @@ if o.Read(&user) == nil {
 }
 ```
 
-Update updates all fields by default. You can update specificed fields:
+Update updates all fields by default. You can update specified fields:
 
 ```go
 // Only update Name
@@ -153,6 +153,6 @@ if num, err := o.Delete(&User{Id: 1}); err == nil {
 
 Delete will also manipulate reverse relationships. E.g.: `Post` has a foreign key to `User`. If on_delete is set to `cascade`, `Post` will be deleted while delete `User`.
 
-After deleting it will clean up values for auto fields.
+After deleting, it will clean up values for auto fields.
 
-**Changed in 1.0.3** After deleting it will **not** clean up values for auto fields.
+**Changed in 1.0.3** After deleting, it will **not** clean up values for auto fields.

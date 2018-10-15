@@ -1,26 +1,30 @@
 ---
-name: Bee tool usage
+name: bee tool usage
 sort: 2
 ---
 
 # Introduction to bee tool
 
-Bee tool is a project for help develop beego rapidly. With bee tool we can create, auto compile and reload, develop, test, and deploy beego applications easily.
+Bee tool is a project for rapid Beego development. With bee tool developers can create, auto compile and reload, develop, test, and deploy Beego applications quickly and easily.
 
 ## Installing bee tool
 
-You can install bee tool through following command:
+Install bee tool with the following command:
 
 	go get github.com/beego/bee
-	
+
+Update the bee tool with the following command:
+
+	go get -u github.com/beego/bee
+
 `bee` is installed into `GOPATH/bin` by default. You need to add `GOPATH/bin` to your PATH, otherwise the `bee` command won't work.
 
-## Bee tool commands
+## bee tool commands
 
-Type `bee` in command line. We can see following messages:
+Type `bee` in command line and the following messages with be displayed:
 
 ```
-Bee is a tool for managing beego framework.
+bee is a tool for managing Beego framework.
 
 Usage:
 
@@ -28,18 +32,19 @@ Usage:
 
 The commands are:
 
-    new         create an application base on beego framework
-    run         run the app which can hot compile
-    pack        compress an beego project
-    api         create an api application base on beego framework
-    router      auto-generate routers for the app controllers
-    test        test the app
-    bale        packs non-Go files to Go source files	
-```	
+	new         Create a Beego application
+	run         run the app and start a Web server for development
+	pack        Compress a Beego project into a single file
+	api         create an API Beego application
+	bale        packs non-Go files to Go source files
+	version     show the bee, Beego and Go version
+	generate    source code generator
+	migrate     run database migrations
+```
 
-### Command new
+### Command `new`
 
-`new` can create a new web project. You can create a new beego project by typing `bee new <project name>` under `$GOPATH`. It will generate all the project folders and files:
+The `new` command can create a new web project. You can create a new Beego project by typing `bee new <project name>` under `$GOPATH/src`. This will generate all the default project folders and files:
 
 ```
 bee new myproject
@@ -63,60 +68,29 @@ bee new myproject
 ```
 myproject
 ├── conf
-│   └── app.conf
+│   └── app.conf
 ├── controllers
-│   └── default.go
+│   └── default.go
 ├── main.go
 ├── models
+├── routers
+│   └── router.go
 ├── static
-│   ├── css
-│   ├── img
-│   └── js
+│   ├── css
+│   ├── img
+│   └── js
+├── tests
+│   └── default_test.go
 └── views
     └── index.tpl
 
 8 directories, 4 files
 ```
 
-### Command run
+### Command `api`
 
-When we develop a Go project, we often have problem that we need to compile the project and run it manually. `bee run` command will supervise the file system of beego project using inotify so that we can see the result directly after the modifications for project.
-
-```
-bee run
-13-11-25 09:53:04 [INFO] Uses 'myproject' as 'appname'
-13-11-25 09:53:04 [INFO] Initializing watcher...
-13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/controllers)
-13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/models)
-13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject)
-13-11-25 09:53:04 [INFO] Start building...
-13-11-25 09:53:16 [SUCC] Build was successful
-13-11-25 09:53:16 [INFO] Restarting myproject ...
-13-11-25 09:53:16 [INFO] ./myproject is running...
-```
-Open browser and visit `http://localhost:8080/`, you should see some changes:
-
-![](../images/beerun.png)
-
-After modifing the `default.go` file in `controllers` folder, we can see
-these output in command line:
-
-```
-13-11-25 10:11:20 [EVEN] "/gopath/src/myproject/controllers/default.go": DELETE|MODIFY
-13-11-25 10:11:20 [INFO] Start building...
-13-11-25 10:11:20 [SKIP] "/gopath/src/myproject/controllers/default.go": CREATE
-13-11-25 10:11:23 [SKIP] "/gopath/src/myproject/controllers/default.go": MODIFY
-13-11-25 10:11:23 [SUCC] Build was successful
-13-11-25 10:11:23 [INFO] Restarting myproject ...
-13-11-25 10:11:23 [INFO] ./myproject is running...
-```
-
-Refresh browser we can see the result of the modifications are already
-there.
-
-### Command api
-
-The `new` command is used for crating new web applications. But there are many users who use beego for developing API applications. We can use `api` command to create API applications. Here is the result of running `bee api project_name`:
+The `new` command is used for crafting new web applications. The `api` command is used to create new API applications.
+Here is the result of running `bee api project_name`:
 
 ```
 bee api apiproject
@@ -132,50 +106,71 @@ create models object.go: /gopath/src/apiproject/models/object.go
 create main.go: /gopath/src/apiproject/main.go
 ```
 
-Here is the project structure of this API application:
+Below is the generated project structure of a new API application:
 
 ```
 apiproject
 ├── conf
 │   └── app.conf
 ├── controllers
-│   └── default.go
+│   └── object.go
+│   └── user.go
+├── docs
+│   └── doc.go
 ├── main.go
 ├── models
 │   └── object.go
+│   └── user.go
+├── routers
+│   └── router.go
 └── tests
     └── default_test.go
 ```
 
-Compare to Web application, the API application doesn't have static and
-views folder but a test module for unit testing.
+Compare this to the `bee new myproject` command seen earlier.
+Note that the new API application doesn't have a `static` and `views` folder.
 
-### Command test
+You can also create a model and controller based on the database schema by providing database conn:
 
-This is a wrapper for `go test`. It can run the test cases in test folder
-of beego project.
+`bee api [appname] [-tables=""] [-driver=mysql] [-conn=root:@tcp(127.0.0.1:3306)/test]`
+
+### Command `run`
+
+The `bee run` command will supervise the file system of any Beego project using [inotify](http://en.wikipedia.org/wiki/Inotify).  The results will autocompile and display immediately after any modification in the Beego project folders.
 
 ```
-bee test apiproject
-13-11-25 10:46:57 [INFO] Initializing watcher...
-13-11-25 10:46:57 [TRAC] Directory(/gopath/src/apiproject/controllers)
-13-11-25 10:46:57 [TRAC] Directory(/gopath/src/apiproject/models)
-13-11-25 10:46:57 [TRAC] Directory(/gopath/src/apiproject)
-13-11-25 10:46:57 [INFO] Start building...
-13-11-25 10:46:58 [SUCC] Build was successful
-13-11-25 10:46:58 [INFO] Restarting apiproject ...
-13-11-25 10:46:58 [INFO] ./apiproject is running...
-13-11-25 10:46:58 [INFO] Start testing...
-13-11-25 10:46:59 [TRAC] ============== Test Begin ===================
-PASS
-ok  	apiproject/tests	0.100s
-13-11-25 10:47:00 [TRAC] ============== Test End ===================
-13-11-25 10:47:00 [SUCC] Test finish
+13-11-25 09:53:04 [INFO] Uses 'myproject' as 'appname'
+13-11-25 09:53:04 [INFO] Initializing watcher...
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/controllers)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/models)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject)
+13-11-25 09:53:04 [INFO] Start building...
+13-11-25 09:53:16 [SUCC] Build was successful
+13-11-25 09:53:16 [INFO] Restarting myproject ...
+13-11-25 09:53:16 [INFO] ./myproject is running...
+```
+Visting `http://localhost:8080/` with a web browser will display your app running:
+
+![](../images/beerun.png)
+
+After modifying the `default.go` file in the `controllers` folder, the following output will be displayed in the command line:
+
+```
+13-11-25 10:11:20 [EVEN] "/gopath/src/myproject/controllers/default.go": DELETE|MODIFY
+13-11-25 10:11:20 [INFO] Start building...
+13-11-25 10:11:20 [SKIP] "/gopath/src/myproject/controllers/default.go": CREATE
+13-11-25 10:11:23 [SKIP] "/gopath/src/myproject/controllers/default.go": MODIFY
+13-11-25 10:11:23 [SUCC] Build was successful
+13-11-25 10:11:23 [INFO] Restarting myproject ...
+13-11-25 10:11:23 [INFO] ./myproject is running...
 ```
 
-### Command pack
+Refresh the browser to show the results of the new modifications.
 
-`pack` command is used to compress the project into a single file. Then we can deploy the project by uploading and extracting the zip file to the server.
+
+### Command `pack`
+
+The `pack` command is used to compress the project into a single file. The compressed file can be deployed by uploading and extracting the zip file to the server.
 
 ```
 bee pack
@@ -188,7 +183,7 @@ exclude suffix: .go:.DS_Store:.tmp
 file write to `/gopath/src/apiproject/apiproject.tar.gz`
 ```
 
-We can see compressed file in the project folder:
+The compressed file will be in the project folder:
 
 ```
 rwxr-xr-x  1 astaxie  staff  8995376 11 25 22:46 apiproject
@@ -200,21 +195,97 @@ drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 models
 drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 tests
 ```
 
-### Command router
+### Command `bale`
 
-This command doesn't work yet. In the future it will generate the routers by analysing the function in controllers.
+This command is currently only available to the developer team. It is used to compress all static files in to a single binary file so that they do not need to carry static files including js, css, images and views when publishing the project. Those files will be self-extracting with non-overwrite when the program starts.
 
-### Command bale
+### Command `version`
 
-This command is currently only available to developer team. It's mainly used for compressing all the static files in to a single binary file. So we don't need to carry  static files including js, css, images and views when publish the project. Those files will be self-extracting with non-overwrite when program starts.
+This command displays the version of `bee`, `beego`, and `go`.
 
-## Bee tool configuration
+```
+$ bee version
+bee   :1.2.2
+Beego :1.4.2
+Go    :go version go1.3.3 darwin/amd64
+```
 
-You may notice that there is a file named `bee.json` in bee tool source code folder, this file is the configuration file of beego. The full features haven't been done yet, but there are some options you'd like to use for now:
+### Command `generate`
+This command will generate the routers by analyzing the functions in controllers.
+
+
+```
+bee generate scaffold [scaffoldname] [-fields=""] [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"]
+    The generate scaffold command will do a number of things for you.
+    -fields: a list of table fields. Format: field:type, ...
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+    example: bee generate scaffold post -fields="title:string,body:text"
+
+bee generate model [modelname] [-fields=""]
+    generate RESTful model based on fields
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate controller [controllerfile]
+    generate RESTful controllers
+
+bee generate view [viewpath]
+    generate CRUD view in viewpath
+
+bee generate migration [migrationfile] [-fields=""]
+    generate migration file for making database schema update
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate docs
+    generate swagger doc file
+
+bee generate test [routerfile]
+    generate testcase
+
+bee generate appcode [-tables=""] [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"] [-level=3]
+    generate appcode based on an existing database
+    -tables: a list of table names separated by ',', default is empty, indicating all tables
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver.
+             default for mysql:    root:@tcp(127.0.0.1:3306)/test
+             default for postgres: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    -level:  [1 | 2 | 3], 1 = models; 2 = models,controllers; 3 = models,controllers,router
+```
+
+
+### Command `migrate`
+This command will run database migration scripts.
+
+```
+bee migrate [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"]
+    run all outstanding migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate rollback [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"]
+    rollback the last migration operation
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate reset [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"]
+    rollback all migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate refresh [-driver=mysql] [-conn="root:@tcp(127.0.0.1:3306)/test"]
+    rollback all migrations and run them all again
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+```
+
+
+## bee tool configuration
+
+The file `bee.json` in the bee tool source code folder is the Beego configuration file. This file is still under develpment, but some options are already available to use:
 
 - `"version": 0`: version of file, for checking incompatible format version.
-- `"go_install": false`: if you use full import path like `github.com/user/repo/subpkg`, then you can enable this opetion to run `go install` and speed up you build processes.
-- `"watch_ext": []`: add other file extensions to watch(only watch `.go` files by default). For example, `.ini`, `.conf`, etc.
-- `"dir_structure":{}`: if your folders' name are not same as MVC classic name, you can use this option use change them.
+- `"go_install": false`: if you use a full import path like `github.com/user/repo/subpkg` you can enable this option to run `go install` and speed up you build processes.
+- `"watch_ext": []`: add other file extensions to watch (only watch `.go` files by default). For example, `.ini`, `.conf`, etc.
+- `"dir_structure":{}`: if your folder names are not the same as MVC classic names you can use this option to change them.
 - `"cmd_args": []`: add command arguments for every start.
-- `"envs": []`: setting environment variables for every start.
+- `"envs": []`: set environment variables for every start.

@@ -34,13 +34,13 @@ func (this *MainController) Post() {
 }
 ```
 
-更多其他的 request 的信息，用户可以通过 `this.Ctx.Request` 获取信息，关于该对象的属性和方法参考手册[Request](http://gowalker.org/net/http#Request)。
+更多其他的 request 的信息，用户可以通过 `this.Ctx.Request` 获取信息，关于该对象的属性和方法参考手册 [Request](http://gowalker.org/net/http#Request)。
 
 ## 直接解析到 struct
 
 如果要把表单里的内容赋值到一个 struct 里，除了用上面的方法一个一个获取再赋值外，beego 提供了通过另外一个更便捷的方式，就是通过 struct 的字段名或 tag 与表单字段对应直接解析到 struct。
 
-定义struct：
+定义 struct：
 
 ```go
 type user struct {
@@ -86,12 +86,16 @@ func (this *MainController) Post() {
 2. 在 Controller 中
 
 ```go
-func (this *ObejctController) Post() {
+func (this *ObjectController) Post() {
 	var ob models.Object
-	json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
-	objectid := models.AddOne(ob)
-	this.Data["json"] = "{\"ObjectId\":\"" + objectid + "\"}"
-	this.ServeJson()
+	var err error
+	if err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob); err == nil {
+	    objectid := models.AddOne(ob)
+	    this.Data["json"] = "{\"ObjectId\":\"" + objectid + "\"}"
+	} else {
+	    this.Data["json"] = err.Error()
+	}
+	this.ServeJSON()
 }
 ```
 
@@ -116,37 +120,51 @@ Beego 提供了两个很方便的方法来处理文件上传：
 - SaveToFile(fromfile, tofile string) error
 
 	该方法是在 GetFile 的基础上实现了快速保存的功能
+	fromfile 是提交时候的 html 表单中的 name
+
+```html
+<form enctype="multipart/form-data" method="post">
+	<input type="file" name="uploadname" />
+	<input type="submit">
+</form>
+```
 
 保存的代码例子如下：
 
 ```go
-func (this *MainController) Post() {
-	this.SaveToFile("the_file","/var/www/uploads/uploaded_file.txt")
+func (c *FormController) Post() {
+	f, h, err := c.GetFile("uploadname")
+	if err != nil {
+		log.Fatal("getfile err ", err)
+	}
+	defer f.Close()
+	c.SaveToFile("uploadname", "static/upload/" + h.Filename) // 保存位置在 static/upload, 没有文件夹要先创建
+	
 }
 ```
 
 ## 数据绑定
 
-支持从用户请求中直接数据bind到指定的对象,例如请求地址如下
+支持从用户请求中直接数据 bind 到指定的对象,例如请求地址如下
 
 	?id=123&isok=true&ft=1.2&ol[0]=1&ol[1]=2&ul[]=str&ul[]=array&user.Name=astaxie
 
-```		
-var id int  
-ctx.Input.Bind(&id, "id")  //id ==123
+```
+var id int
+this.Ctx.Input.Bind(&id, "id")  //id ==123
 
-var isok bool  
-ctx.Input.Bind(&isok, "isok")  //isok ==true
+var isok bool
+this.Ctx.Input.Bind(&isok, "isok")  //isok ==true
 
-var ft float64  
-ctx.Input.Bind(&ft, "ft")  //ft ==1.2
+var ft float64
+this.Ctx.Input.Bind(&ft, "ft")  //ft ==1.2
 
-ol := make([]int, 0, 2)  
-ctx.Input.Bind(&ol, "ol")  //ol ==[1 2]
+ol := make([]int, 0, 2)
+this.Ctx.Input.Bind(&ol, "ol")  //ol ==[1 2]
 
-ul := make([]string, 0, 2)  
-ctx.Input.Bind(&ul, "ul")  //ul ==[str array]
+ul := make([]string, 0, 2)
+this.Ctx.Input.Bind(&ul, "ul")  //ul ==[str array]
 
-user struct{Name}  
-ctx.Input.Bind(&user, "user")  //user =={Name:"astaxie"}
+user struct{Name}
+this.Ctx.Input.Bind(&user, "user")  //user =={Name:"astaxie"}
 ```
